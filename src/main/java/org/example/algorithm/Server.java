@@ -66,11 +66,14 @@ public class Server {
             case heartBeat -> heartBeatService.onReceive(packet,message);
             default -> throw new RuntimeException("Bad type of message");
         }
+
+    }
+
+    public void SendHeartBeat() throws IOException {
         if(isLeader){
             heartBeatService.sendHeartBeat();
         }
     }
-
 
     public int getMessageSize() {
         return messageSize;

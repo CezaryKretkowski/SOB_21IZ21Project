@@ -33,7 +33,7 @@ public class MainThread extends Thread{
                 if(!packet.getAddress().equals(socket.getLocalAddress())){
                     parent.onReceive(packet);
                 }
-
+                parent.SendHeartBeat();
             }
             catch (SocketTimeoutException e)
             {
@@ -43,6 +43,7 @@ public class MainThread extends Thread{
             {
                 Debug.log(e.getMessage());
             }
+
 
         }
     }
