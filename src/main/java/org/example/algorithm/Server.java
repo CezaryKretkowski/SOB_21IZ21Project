@@ -56,10 +56,15 @@ public class Server {
 
     public void onReceive(DatagramPacket packet) throws IOException {
         String jsonMessage = new String(packet.getData(),0, packet.getLength(), StandardCharsets.UTF_8);
-
-
         Message message = new Message(jsonMessage);
+
+        if (!message.verifyToken()) {
+            Debug.log("Unauthorized message received from: " + packet.getAddress().getHostAddress());
+            return;
+        }
+
         Debug.log(message.type+": "+packet.getAddress().getHostAddress());
+
         switch (message.type){
             case voteRequest -> electionService.onRequestReceive(packet,message);
             case voteResponse -> electionService.onResponseReceive(packet,message);
@@ -69,7 +74,7 @@ public class Server {
 
     }
 
-    public void SendHeartBeat() throws IOException {
+    public void sendHeartBeat() throws IOException {
         if(isLeader){
             heartBeatService.sendHeartBeat();
         }
