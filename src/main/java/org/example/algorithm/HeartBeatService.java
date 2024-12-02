@@ -22,7 +22,7 @@ public class HeartBeatService {
         }
     }
     private void whenForwarder(DatagramPacket packet) throws IOException {
-        Message message = new Message("",Type.heartBeat,"HartBeat return");
+        Message message = new Message(Type.heartBeat,"HartBeat return");
         String jsonMessage = message.toJson();
         byte[] buf = jsonMessage.getBytes();
         DatagramPacket returnPackage = new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort());
@@ -38,7 +38,8 @@ public class HeartBeatService {
     public void sendHeartBeat() throws IOException {
         if(!socket.getBroadcast())
             socket.setBroadcast(true);
-        Message message = new Message("",Type.heartBeat,"heart beat");
+
+        Message message = new Message(Type.heartBeat,"heart beat");
         byte[] buffer = message.toJson().getBytes();
         DatagramPacket packet =
                 new DatagramPacket(buffer, buffer.length, InetAddress.getByName("255.255.255.255"), socket.getLocalPort());
