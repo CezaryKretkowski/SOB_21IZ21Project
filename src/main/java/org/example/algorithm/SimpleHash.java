@@ -13,6 +13,7 @@ public class SimpleHash {
 
     public static boolean verifyHash(String data, String key, String hash) {
         String computedHash = hash(data, key);
+        System.out.println("data: " + data + " key: " + key + " hash: " + hash);
         return computedHash.equals(hash);
     }
 }

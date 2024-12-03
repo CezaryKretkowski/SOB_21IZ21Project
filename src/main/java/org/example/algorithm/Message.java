@@ -6,7 +6,7 @@ public class Message {
     public String token;
     public Type type;
     public String content;
-    private static final String SECRET_KEY = "shared-secret-key";
+    public static String SECRET_KEY = "shared-secret-key";
 
     public Message(){}
 
@@ -23,11 +23,11 @@ public class Message {
     }
 
     private String generateToken() {
-        return SimpleHash.hash(content, SECRET_KEY);
+        return CustomHash.hash(content, SECRET_KEY);
     }
 
     public boolean verifyToken() {
-        return SimpleHash.verifyHash(content, SECRET_KEY, token);
+        return CustomHash.verifyHash(content, SECRET_KEY, token);
     }
 
     public String toJson() {
