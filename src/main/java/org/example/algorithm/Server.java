@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Server {
+    private final LogHandler logHandler; // Interfejs do obsługi logów
     public boolean isLeader = false;
     public boolean isCandidate = false;
     public boolean isForwarded = false;
@@ -20,70 +21,72 @@ public class Server {
     private int messageSize = 2048;
     private int hostNumber = 3;
 
-
-    public Server() {
-        forwardersAddresses = new LinkedList<InetAddress>();
-
+    public Server(LogHandler logHandler) {
+        this.logHandler = logHandler;
+        forwardersAddresses = new LinkedList<>();
     }
+
     public void start(InetAddress address) throws SocketException {
         DatagramSocket socket = new DatagramSocket(4445, address);
-        //to do możliwość konfiguracji timeout do przetestownia też
-        socket.setSoTimeout(500);                                                                                       //to do możliwość konfiguracji timeout do przetestownia też
-        electionService = new ElectionService(this,socket);
-        heartBeatService = new HeartBeatService(this,socket);
+        socket.setSoTimeout(500); // Możliwość konfiguracji timeoutu
+        logHandler.log("Server started on: " + address.getHostAddress());
+
+        electionService = new ElectionService(this, socket, logHandler);
+        heartBeatService = new HeartBeatService(this, socket);
 
         mainThread = new MainThread(this, socket);
         mainThread.start();
     }
-    public void stop(){
 
-        mainThread.stopThread();
+    public void stop() {
+        if (mainThread != null) {
+            mainThread.stopThread();
+            logHandler.log("Server stopped.");
+        }
     }
 
-
-    public void onTimeOut()  {
-        Debug.log("Time Out");
+    public void onTimeOut() {
+        logHandler.log("Time Out occurred.");
         try {
-            if (!isLeader)                                                                                                // jeśli jako lider dostaje time out oznacz że żadaen z serwerów nie działa poza liderem
+            if (!isLeader) {
                 electionService.onVote();
-            else
-                Debug.log("Server is leader , only one server is available");
-
-        }catch (Exception e){
-            Debug.log(e.getMessage());
+            } else {
+                logHandler.log("Server is leader; only one server is available.");
+            }
+        } catch (Exception e) {
+            logHandler.log("Error during timeout: " + e.getMessage());
         }
     }
 
     public void onReceive(DatagramPacket packet) throws IOException {
-        String jsonMessage = new String(packet.getData(),0, packet.getLength(), StandardCharsets.UTF_8);
+        String jsonMessage = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
         Message message = new Message(jsonMessage);
 
         if (!message.verifyToken()) {
-            Debug.log("Unauthorized message received from: " + packet.getAddress().getHostAddress());
+            logHandler.log("Unauthorized message received from: " + packet.getAddress().getHostAddress());
             return;
         }
 
-        Debug.log(message.type+": "+packet.getAddress().getHostAddress());
+        logHandler.log(message.type + ": " + packet.getAddress().getHostAddress());
 
-        switch (message.type){
-            case voteRequest -> electionService.onRequestReceive(packet,message);
-            case voteResponse -> electionService.onResponseReceive(packet,message);
-            case heartBeat -> heartBeatService.onReceive(packet,message);
+        switch (message.type) {
+            case voteRequest -> electionService.onRequestReceive(packet, message);
+            case voteResponse -> electionService.onResponseReceive(packet, message);
+            case heartBeat -> heartBeatService.onReceive(packet, message);
             default -> throw new RuntimeException("Bad type of message");
         }
-
     }
 
     public void sendHeartBeat() throws IOException {
-        if(isLeader){
+        if (isLeader) {
             heartBeatService.sendHeartBeat();
+            logHandler.log("Heartbeat sent by the leader.");
         }
     }
 
     public int getMessageSize() {
         return messageSize;
     }
-
 
     public int getHostNumber() {
         return hostNumber;

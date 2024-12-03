@@ -5,15 +5,18 @@ import org.example.algorithm.Server;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Main {
 
     private static Server server;
+    private static final BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
+    private static boolean isRunning = true;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -43,6 +46,13 @@ public class Main {
             ipField.setMaximumSize(new Dimension(200, 30));
             ipField.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+            JLabel secretKeyLabel = new JLabel("Secret Key:");
+            secretKeyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            JTextField secretKeyField = new JTextField();
+            secretKeyField.setMaximumSize(new Dimension(200, 30));
+            secretKeyField.setAlignmentX(Component.CENTER_ALIGNMENT);
+
             JButton startButton = new JButton("Start Server");
             JButton stopButton = new JButton("Stop Server");
             startButton.setEnabled(false);
@@ -58,28 +68,27 @@ public class Main {
 
             StyledDocument doc = logPane.getStyledDocument();
             Style regularStyle = logPane.addStyle("Regular", null);
-            Style successStyle = logPane.addStyle("Success", null);
-            Style errorStyle = logPane.addStyle("Error", null);
-            Style boldStyle = logPane.addStyle("Bold", null);
-            StyleConstants.setBold(boldStyle, true);
-            StyleConstants.setForeground(successStyle, new Color(0, 128, 0));
-            StyleConstants.setForeground(errorStyle, new Color(255, 0, 0));
+            StyleConstants.setForeground(regularStyle, Color.BLACK);
 
-            PrintStream logStream = new PrintStream(new OutputStream() {
-                @Override
-                public void write(int b) {
-                    SwingUtilities.invokeLater(() -> {
-                        try {
-                            doc.insertString(doc.getLength(), String.valueOf((char) b), regularStyle);
-                            logPane.setCaretPosition(doc.getLength());
-                        } catch (BadLocationException ex) {
-                            ex.printStackTrace();
-                        }
-                    });
+            // Wątek do obsługi logów
+            Thread logUpdater = new Thread(() -> {
+                while (isRunning) {
+                    try {
+                        String log = logQueue.take(); // Pobranie logu z kolejki
+                        SwingUtilities.invokeLater(() -> {
+                            try {
+                                doc.insertString(doc.getLength(), log + "\n", regularStyle);
+                                logPane.setCaretPosition(doc.getLength());
+                            } catch (BadLocationException ex) {
+                                ex.printStackTrace();
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             });
-            System.setOut(logStream);
-            System.setErr(logStream);
+            logUpdater.start();
 
             ipField.addCaretListener(e -> {
                 String ipText = ipField.getText().trim();
@@ -92,28 +101,34 @@ public class Main {
 
             startButton.addActionListener(e -> {
                 String ip = ipField.getText().trim();
+                String secretKey = secretKeyField.getText().trim();
                 try {
                     InetAddress address = InetAddress.getByName(ip);
-                    server = new Server();
+                    server = new Server(logQueue::offer); // Przekazanie funkcji logującej
                     server.start(address);
-                    logImportant(doc, successStyle, "Server started at address: " + ip);
+                    logQueue.offer("Server started at address: " + ip + " with Secret Key: " + secretKey);
                     ipField.setEnabled(false);
+                    secretKeyField.setEnabled(false);
                     startButton.setEnabled(false);
                     stopButton.setEnabled(true);
                 } catch (UnknownHostException ex) {
                     JOptionPane.showMessageDialog(frame, "Invalid IP address!", "Error", JOptionPane.ERROR_MESSAGE);
                     ipField.setText("");
                 } catch (SocketException ex) {
-                    logImportant(doc, errorStyle, "Error starting server: " + ex.getMessage());
+                    logQueue.offer("Error starting server: " + ex.getMessage());
                     JOptionPane.showMessageDialog(frame, "Error starting server!", "Error", JOptionPane.ERROR_MESSAGE);
+                } catch (IOException ex) {
+                    logQueue.offer("Unexpected error: " + ex.getMessage());
                 }
             });
+
 
             stopButton.addActionListener(e -> {
                 if (server != null) {
                     server.stop();
-                    logImportant(doc, successStyle, "Server stopped.");
+                    logQueue.offer("Server stopped.");
                     ipField.setEnabled(true);
+                    secretKeyField.setEnabled(true);
                     startButton.setEnabled(true);
                     stopButton.setEnabled(false);
                 }
@@ -123,6 +138,12 @@ public class Main {
             centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
             centerPanel.add(ipField);
             centerPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+            centerPanel.add(secretKeyLabel);
+            centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+            centerPanel.add(secretKeyField);
+            centerPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
             buttonPanel.add(startButton);
             buttonPanel.add(stopButton);
             centerPanel.add(buttonPanel);
@@ -139,9 +160,10 @@ public class Main {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (server != null) {
-                logImportant(null, null, "Ctrl+C intercepted! Stopping server...");
+                logQueue.offer("Ctrl+C intercepted! Stopping server...");
                 server.stop();
             }
+            isRunning = false;
         }));
     }
 
@@ -157,19 +179,5 @@ public class Main {
             }
         }
         return true;
-    }
-
-    private static void logImportant(StyledDocument doc, Style style, String message) {
-        if (doc != null && style != null) {
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    doc.insertString(doc.getLength(), message + "\n", style);
-                } catch (BadLocationException ex) {
-                    ex.printStackTrace();
-                }
-            });
-        } else {
-            System.out.println(message);
-        }
     }
 }
