@@ -17,21 +17,19 @@ public class Server {
     private ElectionService electionService;
     private HeartBeatService heartBeatService;
     private MainThread mainThread;
-    private int messageSize = 2048;
-    private int hostNumber = 3;
+    private int messageSize;
+    private int hostNumber;
 
 
     public Server() {
         forwardersAddresses = new LinkedList<InetAddress>();
 
     }
-    public void start(InetAddress address) throws SocketException {
-        DatagramSocket socket = new DatagramSocket(4445, address);
-        //to do możliwość konfiguracji timeout do przetestownia też
-        socket.setSoTimeout(500);                                                                                       //to do możliwość konfiguracji timeout do przetestownia też
-        electionService = new ElectionService(this,socket);
-        heartBeatService = new HeartBeatService(this,socket);
-
+    public void start(InetAddress address, int port, int timeout) throws SocketException {
+        DatagramSocket socket = new DatagramSocket(port, address);
+        socket.setSoTimeout(timeout);
+        electionService = new ElectionService(this, socket);
+        heartBeatService = new HeartBeatService(this, socket);
         mainThread = new MainThread(this, socket);
         mainThread.start();
     }
@@ -84,8 +82,16 @@ public class Server {
         return messageSize;
     }
 
-
     public int getHostNumber() {
         return hostNumber;
     }
+
+    public void setHostNumber(int hostNumber) {
+        this.hostNumber = hostNumber;
+    }
+
+    public void setMessageSize(int messageSize) {
+        this.messageSize = messageSize;
+    }
+
 }
