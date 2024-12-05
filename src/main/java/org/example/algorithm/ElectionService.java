@@ -32,10 +32,11 @@ public class ElectionService {
     public void sendVote() throws IOException {
         if(!socket.getBroadcast())
             socket.setBroadcast(true);
-        Message message = new Message("",Type.voteRequest,"I'm candidate vote for me");
+        Message message = new Message(Type.voteRequest,"I'm candidate vote for me");
         byte[] buffer = message.toJson().getBytes();
         DatagramPacket packet =
-                new DatagramPacket(buffer, buffer.length, InetAddress.getByName("255.255.255.255"), socket.getLocalPort());
+                new DatagramPacket(buffer, buffer.length, InetAddress.getByName("255.255.255.255"),
+                        socket.getLocalPort());
 
         socket.send(packet);
     }
@@ -59,7 +60,7 @@ public class ElectionService {
         parent.isForwarded = true;
         parent.isLeader = false;
         vote = 1;
-        Message responseMessage = new Message("",Type.voteResponse,"Response");
+        Message responseMessage = new Message(Type.voteResponse,"Response");
         byte[] buffer = responseMessage.toJson().getBytes();
         socket.setBroadcast(false);
         DatagramPacket responsePacket =

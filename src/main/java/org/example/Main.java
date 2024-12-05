@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.algorithm.Message;
 import org.example.algorithm.Server;
 
 import javax.swing.*;
@@ -12,8 +13,11 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 public class Main {
-
     private static Server server;
+    private static JPasswordField secretKeyField; // Changed to JPasswordField
+    private static JTextField ipField; // Moved declaration to class level
+    private static JButton startButton; // Moved declaration to class level
+    private static JButton stopButton; // Moved declaration to class level
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -39,12 +43,21 @@ public class Main {
             JLabel ipLabel = new JLabel("Server IP Address:");
             ipLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-            JTextField ipField = new JTextField();
+            ipField = new JTextField();
             ipField.setMaximumSize(new Dimension(200, 30));
             ipField.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-            JButton startButton = new JButton("Start Server");
-            JButton stopButton = new JButton("Stop Server");
+            // Add Secret Key label and field (now using JPasswordField)
+            JLabel secretKeyLabel = new JLabel("Secret Key:");
+            secretKeyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            secretKeyField = new JPasswordField();
+            secretKeyField.setMaximumSize(new Dimension(200, 30));
+            secretKeyField.setAlignmentX(Component.CENTER_ALIGNMENT);
+            secretKeyField.setEchoChar('*'); // Set echo character to '*' for password-like input
+
+            startButton = new JButton("Start Server");
+            stopButton = new JButton("Stop Server");
             startButton.setEnabled(false);
             stopButton.setEnabled(false);
 
@@ -83,21 +96,42 @@ public class Main {
 
             ipField.addCaretListener(e -> {
                 String ipText = ipField.getText().trim();
-                if (isValidIPv4(ipText)) {
+                String secretKeyText = secretKeyField.getText().trim();
+                if (isValidIPv4(ipText) && secretKeyText.length()>0) {
                     startButton.setEnabled(true);
                 } else {
                     startButton.setEnabled(false);
                 }
             });
 
+            secretKeyField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+                @Override
+                public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                    checkSecretKey();
+                }
+
+                @Override
+                public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                    checkSecretKey();
+                }
+
+                @Override
+                public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                    checkSecretKey();
+                }
+            });
+
             startButton.addActionListener(e -> {
                 String ip = ipField.getText().trim();
+                String secretKey = new String(secretKeyField.getPassword()).trim(); // Get secret key from JPasswordField
                 try {
                     InetAddress address = InetAddress.getByName(ip);
                     server = new Server();
                     server.start(address);
+                    Message.SECRET_KEY = secretKey;
                     logImportant(doc, successStyle, "Server started at address: " + ip);
                     ipField.setEnabled(false);
+                    secretKeyField.setEnabled(false);
                     startButton.setEnabled(false);
                     stopButton.setEnabled(true);
                 } catch (UnknownHostException ex) {
@@ -114,6 +148,7 @@ public class Main {
                     server.stop();
                     logImportant(doc, successStyle, "Server stopped.");
                     ipField.setEnabled(true);
+                    secretKeyField.setEnabled(true);
                     startButton.setEnabled(true);
                     stopButton.setEnabled(false);
                 }
@@ -122,6 +157,9 @@ public class Main {
             centerPanel.add(ipLabel);
             centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
             centerPanel.add(ipField);
+            centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+            centerPanel.add(secretKeyLabel); // Add Secret Key label
+            centerPanel.add(secretKeyField); // Add Secret Key input field
             centerPanel.add(Box.createRigidArea(new Dimension(0, 20)));
             buttonPanel.add(startButton);
             buttonPanel.add(stopButton);
@@ -143,6 +181,11 @@ public class Main {
                 server.stop();
             }
         }));
+    }
+
+    private static void checkSecretKey() {
+        String secretKey = new String(secretKeyField.getPassword()).trim(); // Get the text from password field
+        startButton.setEnabled(isValidIPv4(ipField.getText().trim()) && !secretKey.isEmpty());
     }
 
     public static boolean isValidIPv4(String ip) {
