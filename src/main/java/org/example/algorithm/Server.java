@@ -1,5 +1,8 @@
 package org.example.algorithm;
 
+import org.example.config.ConfigLoader;
+import org.example.config.ServerConfig;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -19,16 +22,18 @@ public class Server {
     private MainThread mainThread;
     private int messageSize = 2048;
     private int hostNumber = 3;
-
+    private DatagramSocket socket;
 
     public Server() {
         forwardersAddresses = new LinkedList<InetAddress>();
 
     }
     public void start(InetAddress address) throws SocketException {
-        DatagramSocket socket = new DatagramSocket(4445, address);
+        ServerConfig config = ConfigLoader.loadConfig("config.yaml");
+        socket = new DatagramSocket(config.getServer().getPort(), address);
+        hostNumber = config.getServer().getHostNumber();
         //to do możliwość konfiguracji timeout do przetestownia też
-        socket.setSoTimeout(500);                                                                                       //to do możliwość konfiguracji timeout do przetestownia też
+        socket.setSoTimeout(config.getServer().getTimeout());                                                                                       //to do możliwość konfiguracji timeout do przetestownia też
         electionService = new ElectionService(this,socket);
         heartBeatService = new HeartBeatService(this,socket);
 
@@ -38,6 +43,7 @@ public class Server {
     public void stop(){
 
         mainThread.stopThread();
+        socket.close();
     }
 
 

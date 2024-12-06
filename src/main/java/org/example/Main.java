@@ -1,11 +1,15 @@
 package org.example;
 
+import org.example.algorithm.Message;
 import org.example.algorithm.Server;
+import org.example.config.ConfigLoader;
+import org.example.config.ServerConfig;
 
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
-import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -15,10 +19,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Main {
 
     private static Server server;
-    private static final BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
-    private static boolean isRunning = true;
+    private static JPasswordField secretKeyField; // Changed to JPasswordField
+    private static JTextField ipField; // Moved declaration to class level
+    private static JButton startButton; // Moved declaration to class level
+    private static JButton stopButton; // Moved declaration to class level
 
     public static void main(String[] args) {
+        ServerConfig config = ConfigLoader.loadConfig("config.yaml");
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("RAFT Server");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -42,19 +49,22 @@ public class Main {
             JLabel ipLabel = new JLabel("Server IP Address:");
             ipLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-            JTextField ipField = new JTextField();
+            ipField = new JTextField();
             ipField.setMaximumSize(new Dimension(200, 30));
             ipField.setAlignmentX(Component.CENTER_ALIGNMENT);
+            ipField.setText(config.getServer().getAddress());
+
 
             JLabel secretKeyLabel = new JLabel("Secret Key:");
             secretKeyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-            JTextField secretKeyField = new JTextField();
+            secretKeyField = new JPasswordField();
             secretKeyField.setMaximumSize(new Dimension(200, 30));
             secretKeyField.setAlignmentX(Component.CENTER_ALIGNMENT);
+            secretKeyField.setEchoChar('*'); // Set echo character to '*' for password-like input
 
-            JButton startButton = new JButton("Start Server");
-            JButton stopButton = new JButton("Stop Server");
+            startButton = new JButton("Start Server");
+            stopButton = new JButton("Stop Server");
             startButton.setEnabled(false);
             stopButton.setEnabled(false);
 
@@ -68,45 +78,73 @@ public class Main {
 
             StyledDocument doc = logPane.getStyledDocument();
             Style regularStyle = logPane.addStyle("Regular", null);
-            StyleConstants.setForeground(regularStyle, Color.BLACK);
+            Style successStyle = logPane.addStyle("Success", null);
+            Style errorStyle = logPane.addStyle("Error", null);
+            Style boldStyle = logPane.addStyle("Bold", null);
+            StyleConstants.setBold(boldStyle, true);
+            StyleConstants.setForeground(successStyle, new Color(0, 128, 0));
+            StyleConstants.setForeground(errorStyle, new Color(255, 0, 0));
 
-            // Wątek do obsługi logów
-            Thread logUpdater = new Thread(() -> {
-                while (isRunning) {
-                    try {
-                        String log = logQueue.take(); // Pobranie logu z kolejki
-                        SwingUtilities.invokeLater(() -> {
-                            try {
-                                doc.insertString(doc.getLength(), log + "\n", regularStyle);
-                                logPane.setCaretPosition(doc.getLength());
-                            } catch (BadLocationException ex) {
-                                ex.printStackTrace();
-                            }
-                        });
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
+            String ipText = ipField.getText().trim();
+            String secretKeyText = secretKeyField.getText().trim();
+            if (isValidIPv4(ipText) && secretKeyText.length()>0) {
+                startButton.setEnabled(true);
+            } else {
+                startButton.setEnabled(false);
+            }
+
+            PrintStream logStream = new PrintStream(new OutputStream() {
+                @Override
+                public void write(int b) {
+                    SwingUtilities.invokeLater(() -> {
+                        try {
+                            doc.insertString(doc.getLength(), String.valueOf((char) b), regularStyle);
+                            logPane.setCaretPosition(doc.getLength());
+                        } catch (BadLocationException ex) {
+                            ex.printStackTrace();
+                        }
+                    });
                 }
             });
-            logUpdater.start();
+            System.setOut(logStream);
+            System.setErr(logStream);
 
             ipField.addCaretListener(e -> {
-                String ipText = ipField.getText().trim();
-                if (isValidIPv4(ipText)) {
+                String ip = ipField.getText().trim();
+                String secretKey = secretKeyField.getText().trim();
+                if (isValidIPv4(ip) && secretKey.length()>0) {
                     startButton.setEnabled(true);
                 } else {
                     startButton.setEnabled(false);
                 }
             });
 
+            secretKeyField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+                @Override
+                public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                    checkSecretKey();
+                }
+
+                @Override
+                public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                    checkSecretKey();
+                }
+
+                @Override
+                public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                    checkSecretKey();
+                }
+            });
+
             startButton.addActionListener(e -> {
                 String ip = ipField.getText().trim();
-                String secretKey = secretKeyField.getText().trim();
+                String secretKey = new String(secretKeyField.getPassword()).trim(); // Get secret key from JPasswordField
                 try {
                     InetAddress address = InetAddress.getByName(ip);
-                    server = new Server(logQueue::offer); // Przekazanie funkcji logującej
+                    server = new Server();
                     server.start(address);
-                    logQueue.offer("Server started at address: " + ip + " with Secret Key: " + secretKey);
+                    Message.SECRET_KEY = secretKey;
+                    logImportant(doc, successStyle, "Server started at address: " + ip);
                     ipField.setEnabled(false);
                     secretKeyField.setEnabled(false);
                     startButton.setEnabled(false);
@@ -115,18 +153,15 @@ public class Main {
                     JOptionPane.showMessageDialog(frame, "Invalid IP address!", "Error", JOptionPane.ERROR_MESSAGE);
                     ipField.setText("");
                 } catch (SocketException ex) {
-                    logQueue.offer("Error starting server: " + ex.getMessage());
+                    logImportant(doc, errorStyle, "Error starting server: " + ex.getMessage());
                     JOptionPane.showMessageDialog(frame, "Error starting server!", "Error", JOptionPane.ERROR_MESSAGE);
-                } catch (IOException ex) {
-                    logQueue.offer("Unexpected error: " + ex.getMessage());
                 }
             });
-
 
             stopButton.addActionListener(e -> {
                 if (server != null) {
                     server.stop();
-                    logQueue.offer("Server stopped.");
+                    logImportant(doc, successStyle, "Server stopped.");
                     ipField.setEnabled(true);
                     secretKeyField.setEnabled(true);
                     startButton.setEnabled(true);
@@ -137,13 +172,10 @@ public class Main {
             centerPanel.add(ipLabel);
             centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
             centerPanel.add(ipField);
-            centerPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-
-            centerPanel.add(secretKeyLabel);
             centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-            centerPanel.add(secretKeyField);
+            centerPanel.add(secretKeyLabel); // Add Secret Key label
+            centerPanel.add(secretKeyField); // Add Secret Key input field
             centerPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-
             buttonPanel.add(startButton);
             buttonPanel.add(stopButton);
             centerPanel.add(buttonPanel);
@@ -160,11 +192,15 @@ public class Main {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (server != null) {
-                logQueue.offer("Ctrl+C intercepted! Stopping server...");
+                logImportant(null, null, "Ctrl+C intercepted! Stopping server...");
                 server.stop();
             }
-            isRunning = false;
         }));
+    }
+
+    private static void checkSecretKey() {
+        String secretKey = new String(secretKeyField.getPassword()).trim(); // Get the text from password field
+        startButton.setEnabled(isValidIPv4(ipField.getText().trim()) && !secretKey.isEmpty());
     }
 
     public static boolean isValidIPv4(String ip) {
@@ -179,5 +215,19 @@ public class Main {
             }
         }
         return true;
+    }
+
+    private static void logImportant(StyledDocument doc, Style style, String message) {
+        if (doc != null && style != null) {
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    doc.insertString(doc.getLength(), message + "\n", style);
+                } catch (BadLocationException ex) {
+                    ex.printStackTrace();
+                }
+            });
+        } else {
+            System.out.println(message);
+        }
     }
 }

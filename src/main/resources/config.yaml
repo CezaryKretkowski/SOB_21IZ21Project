@@ -1,5 +1,5 @@
 server:
   port: 4445
   address: 127.0.0.1
-  timeout: 5000
+  timeout: 500
   hostNumber: 3
