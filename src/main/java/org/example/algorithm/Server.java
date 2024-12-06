@@ -15,7 +15,7 @@ import java.util.List;
 public class Server {
     public boolean isLeader = false;
     public boolean isCandidate = false;
-    public boolean isForwarded = false;
+    public boolean isForwarded = true;
     public List<InetAddress> forwardersAddresses;
     private ElectionService electionService;
     private HeartBeatService heartBeatService;
@@ -23,6 +23,7 @@ public class Server {
     private int messageSize = 2048;
     private int hostNumber = 3;
     private DatagramSocket socket;
+    private int timeOut = 200;
 
     public Server() {
         forwardersAddresses = new LinkedList<InetAddress>();
@@ -44,6 +45,9 @@ public class Server {
 
         mainThread.stopThread();
         socket.close();
+        isCandidate = false;
+        isForwarded =true;
+        isLeader = false;
     }
 
 
@@ -93,5 +97,13 @@ public class Server {
 
     public int getHostNumber() {
         return hostNumber;
+    }
+
+    public int getTimeOut() {
+        return timeOut;
+    }
+
+    public void setTimeOut(int timeOut) {
+        this.timeOut = timeOut;
     }
 }

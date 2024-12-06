@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.Random;
 
 public class ElectionService {
     private int vote;
@@ -17,13 +18,14 @@ public class ElectionService {
         vote = 1;
     }
     public void onVote() throws IOException {
-
+        Random rnd = new Random();
         if(!parent.isCandidate){
             vote = 1;
         }
         else {
             Debug.log("Don't receive any message, resending votes!!");
         }
+        parent.setTimeOut(rnd.nextInt(100,200));
         parent.isCandidate = true;
         Debug.log("Server is candidate");
         sendVote();

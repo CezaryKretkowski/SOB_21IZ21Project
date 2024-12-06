@@ -20,6 +20,13 @@ public class HeartBeatService {
         if(parent.isLeader){
             whenLeader(packet);
         }
+        if(parent.isCandidate)
+        {
+            parent.isCandidate = false;
+            parent.isForwarded =true;
+            parent.isLeader = false;
+            whenForwarder(packet);
+        }
     }
     private void whenForwarder(DatagramPacket packet) throws IOException {
         Message message = new Message(Type.heartBeat,"HartBeat return");
