@@ -17,13 +17,29 @@ public class Server {
     public boolean isCandidate = false;
     public boolean isForwarded = true;
     public List<InetAddress> forwardersAddresses;
-    private ElectionService electionService;
+    public ElectionService electionService;
     private HeartBeatService heartBeatService;
     private MainThread mainThread;
     private int messageSize = 2048;
+
+    public void setHostNumber(int hostNumber) {
+        this.hostNumber = hostNumber;
+    }
+
     private int hostNumber = 3;
     private DatagramSocket socket;
     private int timeOut = 200;
+
+    public int getRndTimeOut() {
+        return rndTimeOut;
+    }
+
+    public void setRndTimeOut(int rndTimeOut) {
+        this.rndTimeOut = rndTimeOut;
+    }
+
+    private int rndTimeOut = 200;
+    private InetAddress leaderAddress;
 
     public Server() {
         forwardersAddresses = new LinkedList<InetAddress>();
@@ -37,7 +53,7 @@ public class Server {
         socket.setSoTimeout(config.getServer().getTimeout());                                                                                       //to do możliwość konfiguracji timeout do przetestownia też
         electionService = new ElectionService(this,socket);
         heartBeatService = new HeartBeatService(this,socket);
-
+        leaderAddress = null;
         mainThread = new MainThread(this, socket);
         mainThread.start();
     }
@@ -69,16 +85,17 @@ public class Server {
         Message message = new Message(jsonMessage);
 
         if (!message.verifyToken()) {
-            Debug.log("Unauthorized message received from: " + packet.getAddress().getHostAddress());
+            //Debug.log("Unauthorized message received from: " + packet.getAddress().getHostAddress());
             return;
         }
 
-        Debug.log(message.type+": "+packet.getAddress().getHostAddress());
+     //  Debug.log("host: "+getHostNumber());
 
         switch (message.type){
             case voteRequest -> electionService.onRequestReceive(packet,message);
             case voteResponse -> electionService.onResponseReceive(packet,message);
-            case heartBeat -> heartBeatService.onReceive(packet,message);
+            case heartBeatRequest -> heartBeatService.onRequestReceive(packet,message);
+            case heartBeatResponse -> heartBeatService.onRequestResponse(packet,message);
             default -> throw new RuntimeException("Bad type of message");
         }
 
@@ -105,5 +122,20 @@ public class Server {
 
     public void setTimeOut(int timeOut) {
         this.timeOut = timeOut;
+    }
+
+    public InetAddress getLeaderAddress() {
+        return leaderAddress;
+    }
+
+    public void setLeaderAddress(InetAddress leaderAddress) {
+        this.leaderAddress = leaderAddress;
+    }
+
+    public void upDateAddressList(DatagramPacket packet){
+        boolean isAny = forwardersAddresses.stream().anyMatch(x->x.equals(packet.getAddress()));
+        if(!isAny){
+            forwardersAddresses.add(packet.getAddress());
+        }
     }
 }
