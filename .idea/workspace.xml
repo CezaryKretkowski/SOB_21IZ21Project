@@ -4,12 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b4e819cb-fb49-4269-916b-7c38bf258c72" name="Changes" comment="Merge Branches first milestone">
+    <list default="true" id="b4e819cb-fb49-4269-916b-7c38bf258c72" name="Changes" comment="fixes after merge">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/CustomHash.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/CustomHash.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/Debug.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/Debug.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/ElectionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/ElectionService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/HeartBeatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/HeartBeatService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/LogHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/LogHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/MainThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/MainThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/Message.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/Server.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/SimpleHash.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/SimpleHash.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/Type.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/Type.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/config/ConfigLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/config/ConfigLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/config/ServerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/config/ServerConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/config/ServerDetails.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/config/ServerDetails.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/config.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,8 +34,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Enum" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -53,27 +68,84 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Application.secondInstance.executor&quot;: &quot;Run&quot;,
-    &quot;Application.third.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/cezar/Desktop/test&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.2.executor": "Run",
+    "Application.3.executor": "Run",
+    "Application.4.executor": "Run",
+    "Application.5.executor": "Run",
+    "Application.6.executor": "Run",
+    "Application.7.executor": "Run",
+    "Application.8.executor": "Run",
+    "Application.Main.executor": "Run",
+    "Application.secondInstance.executor": "Run",
+    "Application.third.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/User/Desktop/SOB_21IZ21Project-base_algorithm",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected="Application.secondInstance">
+}]]></component>
+  <component name="RunManager" selected="Application.8">
+    <configuration name="2" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="org.example.Main" />
+      <module name="SOB_2IZ21Project" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="3" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="org.example.Main" />
+      <module name="SOB_2IZ21Project" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="4" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="org.example.Main" />
+      <module name="SOB_2IZ21Project" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="5" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="org.example.Main" />
+      <module name="SOB_2IZ21Project" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="6" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="org.example.Main" />
+      <module name="SOB_2IZ21Project" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="7" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="org.example.Main" />
+      <module name="SOB_2IZ21Project" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="8" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="org.example.Main" />
+      <module name="SOB_2IZ21Project" />
+      <option name="PROGRAM_PARAMETERS" value="2" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.example.Main" />
       <module name="SOB_2IZ21Project" />
@@ -88,24 +160,14 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="secondInstance" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="org.example.Main" />
-      <module name="SOB_2IZ21Project" />
-      <option name="PROGRAM_PARAMETERS" value="2" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="third" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="org.example.Main" />
-      <module name="SOB_2IZ21Project" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <list>
-      <item itemvalue="Application.secondInstance" />
-      <item itemvalue="Application.third" />
+      <item itemvalue="Application.8" />
+      <item itemvalue="Application.3" />
+      <item itemvalue="Application.4" />
+      <item itemvalue="Application.5" />
+      <item itemvalue="Application.6" />
+      <item itemvalue="Application.7" />
+      <item itemvalue="Application.2" />
       <item itemvalue="Application.Main" />
     </list>
     <recent_temporary>
@@ -141,6 +203,12 @@
       <workItem from="1732211532014" duration="3745000" />
       <workItem from="1733477716371" duration="1718000" />
       <workItem from="1733488066743" duration="1559000" />
+      <workItem from="1733590943650" duration="1181000" />
+      <workItem from="1733935751663" duration="22000" />
+      <workItem from="1734801976062" duration="10104000" />
+      <workItem from="1734813547829" duration="1110000" />
+      <workItem from="1734853971995" duration="44000" />
+      <workItem from="1735487015128" duration="6884000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />
@@ -192,6 +260,9 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/.." />
+    </ignored-roots>
     <MESSAGE value="init" />
     <MESSAGE value="implement basic algorithm" />
     <MESSAGE value="Merge Branches first milestone" />

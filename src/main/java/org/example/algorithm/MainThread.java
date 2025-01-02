@@ -32,8 +32,9 @@ public class MainThread extends Thread{
                 socket.receive(packet);
                 if(!packet.getAddress().equals(socket.getLocalAddress())){
                     parent.onReceive(packet);
+                    parent.upDateAddressList(packet);
                 }
-                Thread.sleep(parent.getTimeOut());
+                Thread.sleep(parent.getRndTimeOut());
                 parent.sendHeartBeat();
             }
             catch (SocketTimeoutException e)

@@ -8,20 +8,34 @@ import java.net.InetAddress;
 public class HeartBeatService {
     private final Server parent;
     private final DatagramSocket socket;
+
     public HeartBeatService(Server parent,DatagramSocket socket){
         this.parent = parent;
         this.socket = socket;
     }
-    public void onReceive(DatagramPacket packet, Message message) throws IOException {
+    public void onRequestReceive(DatagramPacket packet, Message message) throws IOException {
 
         if(parent.isForwarded) {
+            try {
+                Debug.log("Server is forwarder");
+                HeartBeatMessageContent content = new HeartBeatMessageContent(message.content);
+                if (content.hostNumber != parent.getHostNumber()) {
+                    parent.setHostNumber(content.hostNumber);
+                    parent.forwardersAddresses.clear();
+                }
+            } catch (Exception e) {
+                Debug.log("Failed to get content "+message.content);
+            }
             whenForwarder(packet);
+            if(parent.getLeaderAddress()!= null && !parent.getLeaderAddress().equals(packet.getAddress())){
+                parent.setLeaderAddress(packet.getAddress());
+            }
         }
-        if(parent.isLeader){
-            whenLeader(packet);
-        }
+
         if(parent.isCandidate)
         {
+            Debug.log("Server is forwarder");
+            parent.electionService.RestVote();
             parent.isCandidate = false;
             parent.isForwarded =true;
             parent.isLeader = false;
@@ -29,8 +43,7 @@ public class HeartBeatService {
         }
     }
     private void whenForwarder(DatagramPacket packet) throws IOException {
-        Message message = new Message(Type.heartBeat,"HartBeat return");
-        System.out.println("Heart beat message token when Forwarder: " + message.token);
+        Message message = new Message(Type.heartBeatResponse,"HartBeat return");
         String jsonMessage = message.toJson();
         byte[] buf = jsonMessage.getBytes();
         DatagramPacket returnPackage = new DatagramPacket(buf, buf.length, packet.getAddress(),
@@ -38,18 +51,11 @@ public class HeartBeatService {
         socket.send(returnPackage);
     }
 
-    private void whenLeader(DatagramPacket packet){
-        boolean isAny = parent.forwardersAddresses.stream().anyMatch(x->x.equals(packet.getAddress()));
-        if(!isAny){
-            parent.forwardersAddresses.add(packet.getAddress());
-        }
-    }
     public void sendHeartBeat() throws IOException {
         if(!socket.getBroadcast())
             socket.setBroadcast(true);
-
-        Message message = new Message(Type.heartBeat,"heart beat");
-        System.out.println("Send heart beat: " + message.token);
+        String jsonMessage = new HeartBeatMessageContent(parent.getHostNumber(), "heartbeat").toJson();
+        Message message = new Message(Type.heartBeatRequest,jsonMessage);
         byte[] buffer = message.toJson().getBytes();
         DatagramPacket packet =
                 new DatagramPacket(buffer, buffer.length, InetAddress.getByName("255.255.255.255"),
@@ -58,4 +64,6 @@ public class HeartBeatService {
         socket.send(packet);
     }
 
+    public void onRequestResponse(DatagramPacket packet, Message message) {
+    }
 }

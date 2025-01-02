@@ -17,86 +17,112 @@ public class Server {
     public boolean isCandidate = false;
     public boolean isForwarded = true;
     public List<InetAddress> forwardersAddresses;
-    private ElectionService electionService;
+    public ElectionService electionService;
     private HeartBeatService heartBeatService;
     private MainThread mainThread;
     private int messageSize = 2048;
+
     private int hostNumber = 3;
-    private DatagramSocket socket;
     private int timeOut = 200;
+    private int rndTimeOut = 200;
+
+    private InetAddress leaderAddress;
+    private DatagramSocket socket;
+    private ExternalRequestHandler externalRequestHandler;
+
+    private ServerConfig config;
 
     public Server() {
-        forwardersAddresses = new LinkedList<InetAddress>();
-
+        forwardersAddresses = new LinkedList<>();
     }
+
     public void start(InetAddress address) throws SocketException {
-        ServerConfig config = ConfigLoader.loadConfig("config.yaml");
+        config = ConfigLoader.loadConfig("config.yaml"); // Wczytanie konfiguracji
         socket = new DatagramSocket(config.getServer().getPort(), address);
         hostNumber = config.getServer().getHostNumber();
-        //to do możliwość konfiguracji timeout do przetestownia też
-        socket.setSoTimeout(config.getServer().getTimeout());                                                                                       //to do możliwość konfiguracji timeout do przetestownia też
-        electionService = new ElectionService(this,socket);
-        heartBeatService = new HeartBeatService(this,socket);
-
+        socket.setSoTimeout(config.getServer().getTimeout());
+        electionService = new ElectionService(this, socket);
+        heartBeatService = new HeartBeatService(this, socket);
+        leaderAddress = null;
         mainThread = new MainThread(this, socket);
         mainThread.start();
+        int apiPort = config.getServer().getApiPort();
+        externalRequestHandler = new ExternalRequestHandler(this, apiPort);
+        externalRequestHandler.start();
     }
-    public void stop(){
 
-        mainThread.stopThread();
-        socket.close();
+    public void stop() {
+        if (mainThread != null) {
+            mainThread.stopThread();
+        }
+        if (externalRequestHandler != null) {
+            externalRequestHandler.stopHandler();
+        }
+        if (socket != null) {
+            socket.close();
+        }
         isCandidate = false;
-        isForwarded =true;
+        isForwarded = true;
         isLeader = false;
     }
 
-
-    public void onTimeOut()  {
+    public void onTimeOut() {
         Debug.log("Time Out");
         try {
-            if (!isLeader)                                                                                                // jeśli jako lider dostaje time out oznacz że żadaen z serwerów nie działa poza liderem
+            if (!isLeader) {
                 electionService.onVote();
-            else
-                Debug.log("Server is leader , only one server is available");
-
-        }catch (Exception e){
+            } else {
+                Debug.log("Server is leader, only one server is available");
+            }
+        } catch (Exception e) {
             Debug.log(e.getMessage());
         }
     }
 
     public void onReceive(DatagramPacket packet) throws IOException {
-        String jsonMessage = new String(packet.getData(),0, packet.getLength(), StandardCharsets.UTF_8);
+        String jsonMessage = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
         Message message = new Message(jsonMessage);
 
         if (!message.verifyToken()) {
-            Debug.log("Unauthorized message received from: " + packet.getAddress().getHostAddress());
             return;
         }
 
-        Debug.log(message.type+": "+packet.getAddress().getHostAddress());
-
-        switch (message.type){
-            case voteRequest -> electionService.onRequestReceive(packet,message);
-            case voteResponse -> electionService.onResponseReceive(packet,message);
-            case heartBeat -> heartBeatService.onReceive(packet,message);
+        switch (message.type) {
+            case voteRequest -> electionService.onRequestReceive(packet, message);
+            case voteResponse -> electionService.onResponseReceive(packet, message);
+            case heartBeatRequest -> heartBeatService.onRequestReceive(packet, message);
+            case heartBeatResponse -> heartBeatService.onRequestResponse(packet, message);
             default -> throw new RuntimeException("Bad type of message");
         }
-
     }
 
     public void sendHeartBeat() throws IOException {
-        if(isLeader){
+        if (isLeader) {
             heartBeatService.sendHeartBeat();
         }
+    }
+
+    public void upDateAddressList(DatagramPacket packet) {
+        boolean isAny = forwardersAddresses.stream().anyMatch(x -> x.equals(packet.getAddress()));
+        if (!isAny) {
+            forwardersAddresses.add(packet.getAddress());
+        }
+    }
+
+    public ServerConfig getConfig() {
+        return config;
+    }
+
+    public int getHostNumber() {
+        return hostNumber;
     }
 
     public int getMessageSize() {
         return messageSize;
     }
 
-
-    public int getHostNumber() {
-        return hostNumber;
+    public void setHostNumber(int hostNumber) {
+        this.hostNumber = hostNumber;
     }
 
     public int getTimeOut() {
@@ -105,5 +131,21 @@ public class Server {
 
     public void setTimeOut(int timeOut) {
         this.timeOut = timeOut;
+    }
+
+    public int getRndTimeOut() {
+        return rndTimeOut;
+    }
+
+    public void setRndTimeOut(int rndTimeOut) {
+        this.rndTimeOut = rndTimeOut;
+    }
+
+    public InetAddress getLeaderAddress() {
+        return leaderAddress;
+    }
+
+    public void setLeaderAddress(InetAddress leaderAddress) {
+        this.leaderAddress = leaderAddress;
     }
 }

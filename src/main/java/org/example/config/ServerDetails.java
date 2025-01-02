@@ -5,6 +5,7 @@ public class ServerDetails {
     private String address;
     private int timeout;
     private int hostNumber;
+    private int apiPort;
 
     public int getPort() {
         return port;
@@ -36,5 +37,13 @@ public class ServerDetails {
 
     public void setHostNumber(int hostNumber) {
         this.hostNumber = hostNumber;
+    }
+
+    public int getApiPort() {
+        return apiPort;
+    }
+
+    public void setApiPort(int apiPort) {
+        this.apiPort = apiPort;
     }
 }
