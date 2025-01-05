@@ -47,7 +47,7 @@ public class Server {
         mainThread = new MainThread(this, socket);
         mainThread.start();
         int apiPort = config.getServer().getApiPort();
-        externalRequestHandler = new ExternalRequestHandler(this, apiPort);
+        externalRequestHandler = new ExternalRequestHandler(this, apiPort, address);
         externalRequestHandler.start();
     }
 

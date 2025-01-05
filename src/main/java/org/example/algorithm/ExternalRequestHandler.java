@@ -8,9 +8,9 @@ public class ExternalRequestHandler extends Thread {
     private final DatagramSocket externalSocket;
     private volatile boolean running;
 
-    public ExternalRequestHandler(Server server, int port) throws SocketException {
+    public ExternalRequestHandler(Server server, int port, InetAddress bindAddress) throws SocketException {
         this.server = server;
-        this.externalSocket = new DatagramSocket(port);
+        this.externalSocket = new DatagramSocket(port, bindAddress);
         this.running = true;
     }
 

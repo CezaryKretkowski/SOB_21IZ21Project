@@ -1,5 +1,4 @@
 package org.example.algorithm;
-
 import com.google.gson.Gson;
 
 public class HeartBeatMessageContent {
