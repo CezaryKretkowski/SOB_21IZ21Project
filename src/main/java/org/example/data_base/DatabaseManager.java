@@ -37,7 +37,6 @@ public class DatabaseManager {
                     }
                     result.append("\n");
 
-                    // Fetch rows
                     while (rs.next()) {
                         for (int i = 1; i <= columnCount; i++) {
                             result.append(rs.getString(i)).append("\t");
