@@ -44,9 +44,10 @@ public class Server {
         socket.setSoTimeout(config.getServer().getTimeout());
         electionService = new ElectionService(this, socket);
         heartBeatService = new HeartBeatService(this, socket);
-        leaderAddress = null;
+        leaderAddress = address;
         mainThread = new MainThread(this, socket);
         mainThread.start();
+
         int apiPort = config.getServer().getApiPort();
         externalRequestHandler = new ExternalRequestHandler(this, apiPort, address);
         externalRequestHandler.start();
