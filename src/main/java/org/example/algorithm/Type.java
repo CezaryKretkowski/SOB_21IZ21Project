@@ -5,4 +5,5 @@ public enum Type {
     voteResponse,
     heartBeatRequest,
     heartBeatResponse,
+    sqlQuery,
 }

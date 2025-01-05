@@ -2,6 +2,7 @@ package org.example.algorithm;
 
 import org.example.config.ConfigLoader;
 import org.example.config.ServerConfig;
+import org.example.data_base.DatabaseManager;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -84,17 +85,34 @@ public class Server {
         Message message = new Message(jsonMessage);
 
         if (!message.verifyToken()) {
+            System.out.println("Message verification failed.");
             return;
         }
 
-        switch (message.type) {
+        switch (message.getType()) {
+            case sqlQuery -> {
+                DatabaseManager dbManager = DatabaseManager.getInstance();
+                String queryResult = dbManager.executeQuery(message.getContent()); // Użycie metody getContent()
+
+                String response = "SQL Response:\n" + queryResult;
+                DatagramPacket responsePacket = new DatagramPacket(
+                        response.getBytes(),
+                        response.getBytes().length,
+                        packet.getAddress(),
+                        packet.getPort()
+                );
+                socket.send(responsePacket);
+            }
             case voteRequest -> electionService.onRequestReceive(packet, message);
             case voteResponse -> electionService.onResponseReceive(packet, message);
             case heartBeatRequest -> heartBeatService.onRequestReceive(packet, message);
             case heartBeatResponse -> heartBeatService.onRequestResponse(packet, message);
-            default -> throw new RuntimeException("Bad type of message");
+            default -> {
+                System.out.println("Unrecognized message type: " + message.getType());
+            }
         }
     }
+
 
     public void sendHeartBeat() throws IOException {
         if (isLeader) {
