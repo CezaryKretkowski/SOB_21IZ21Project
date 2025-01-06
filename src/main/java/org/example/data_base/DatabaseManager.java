@@ -63,6 +63,8 @@ public class DatabaseManager {
                         }
                         result.append("\n");
                     }
+                }catch(SQLException e){
+                    return "SQL Error: " + e.getMessage();
                 }
             } else {
                 int updateCount = stmt.getUpdateCount();
@@ -72,7 +74,7 @@ public class DatabaseManager {
             logQuery(query, result.toString());
 
             return result.toString();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             return "SQL Error: " + e.getMessage();
         }
     }

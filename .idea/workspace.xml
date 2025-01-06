@@ -5,7 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b4e819cb-fb49-4269-916b-7c38bf258c72" name="Changes" comment="fixes after merge">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/ExternalClientMessage.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database.db" beforeDir="false" afterPath="$PROJECT_DIR$/database.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/ExternalRequestHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/ExternalRequestHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/data_base/DatabaseManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/data_base/DatabaseManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -249,5 +252,16 @@
     <MESSAGE value="implement basic algorithm" />
     <MESSAGE value="Merge Branches first milestone" />
     <option name="LAST_COMMIT_MESSAGE" value="Merge Branches first milestone" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/example/algorithm/ExternalClientMessage.java</url>
+          <line>22</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -29,13 +29,22 @@ public class ExternalRequestHandler extends Thread {
                 System.out.println("External request received: " + receivedData);
 
                 String response;
+                ExternalClientMessage clientMessage = new ExternalClientMessage(receivedData);
+
+                clientMessage.port = packet.getPort();
+                clientMessage.address = packet.getAddress().getHostAddress();
 
                 if (server.isLeader) {
                     DatabaseManager dbManager = DatabaseManager.getInstance();
-                    response = dbManager.executeQuery(receivedData);
-                } else {
+                    response = dbManager.executeQuery(clientMessage.content);
+                }
+                else {
                     InetAddress leaderAddress = server.getLeaderAddress();
                     if (leaderAddress != null) {
+
+                        clientMessage.isForwarder = true;
+
+
                         DatagramPacket forwardPacket = new DatagramPacket(
                                 packet.getData(),
                                 packet.getLength(),
@@ -53,8 +62,8 @@ public class ExternalRequestHandler extends Thread {
                 DatagramPacket responsePacket = new DatagramPacket(
                         response.getBytes(),
                         response.getBytes().length,
-                        packet.getAddress(),
-                        packet.getPort()
+                        InetAddress.getByName(clientMessage.address),
+                        clientMessage.port //port klienta
                 );
                 externalSocket.send(responsePacket);
 
