@@ -18,7 +18,7 @@ public class ExternalRequestHandler extends Thread {
 
     @Override
     public void run() {
-        byte[] buffer = new byte[2048];
+        byte[] buffer = new byte[20048];
         System.out.println("ExternalRequestHandler started on port: " + externalSocket.getLocalPort());
         while (running) {
             try {
@@ -30,9 +30,10 @@ public class ExternalRequestHandler extends Thread {
 
                 String response;
                 ExternalClientMessage clientMessage = new ExternalClientMessage(receivedData);
-
-                clientMessage.port = packet.getPort();
-                clientMessage.address = packet.getAddress().getHostAddress();
+                if(!clientMessage.isForwarder) {
+                    clientMessage.port = packet.getPort();
+                    clientMessage.address = packet.getAddress().getHostAddress();
+                }
 
                 if (server.isLeader) {
                     DatabaseManager dbManager = DatabaseManager.getInstance();
@@ -41,13 +42,14 @@ public class ExternalRequestHandler extends Thread {
                 else {
                     InetAddress leaderAddress = server.getLeaderAddress();
                     if (leaderAddress != null) {
-
+                        System.out.println("work");
                         clientMessage.isForwarder = true;
 
+                        String data = clientMessage.toJson();
 
                         DatagramPacket forwardPacket = new DatagramPacket(
-                                packet.getData(),
-                                packet.getLength(),
+                                data.getBytes(),
+                                data.getBytes().length,
                                 leaderAddress,
                                 server.getConfig().getServer().getApiPort()
                         );
