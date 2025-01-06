@@ -1,4 +1,5 @@
 package org.example.data_base;
+
 import java.sql.*;
 
 public class DatabaseManager {
@@ -10,6 +11,7 @@ public class DatabaseManager {
         try {
             connection = DriverManager.getConnection(dbUrl);
             System.out.println("Connected to SQLite database.");
+            initializeDatabase();
         } catch (SQLException e) {
             System.out.println("Failed to connect to SQLite database: " + e.getMessage());
         }
@@ -20,6 +22,24 @@ public class DatabaseManager {
             instance = new DatabaseManager();
         }
         return instance;
+    }
+
+    private void initializeDatabase() {
+        String createLogsTableSQL = """
+            CREATE TABLE IF NOT EXISTS logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                query TEXT NOT NULL,
+                result TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+            """;
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(createLogsTableSQL);
+            System.out.println("Database initialized: logs table is ready.");
+        } catch (SQLException e) {
+            System.out.println("Failed to initialize database: " + e.getMessage());
+        }
     }
 
     public String executeQuery(String query) {
@@ -79,4 +99,5 @@ public class DatabaseManager {
         }
     }
 }
+
 
