@@ -4,6 +4,7 @@ import org.example.data_base.DatabaseManager;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.List;
 
 public class ExternalRequestHandler extends Thread {
     private final Server server;
@@ -28,22 +29,67 @@ public class ExternalRequestHandler extends Thread {
                 String receivedData = new String(packet.getData(), 0, packet.getLength());
                 System.out.println("External request received: " + receivedData);
 
-                String response;
+                String response = "";
                 ExternalClientMessage clientMessage = new ExternalClientMessage(receivedData);
-                if(!clientMessage.isForwarder) {
+                if(!clientMessage.isBroadcast) {
                     clientMessage.port = packet.getPort();
                     clientMessage.address = packet.getAddress().getHostAddress();
                 }
-
-                if (server.isLeader) {
+                if (clientMessage.isBroadcast) {
+                    // This is a broadcast execution command
                     DatabaseManager dbManager = DatabaseManager.getInstance();
-                    response = dbManager.executeQuery(clientMessage.content);
+                    response = "SQL Response From " + server.getHostNumber() + " " + dbManager.executeQuery(clientMessage.content);
+                    System.out.println("SQL Response From Listener: " + response);
+                }
+                else if (server.isLeader) {
+                    //execute if message is not response from broadcasted listener
+                    if(!clientMessage.content.startsWith("SQL Response")) {
+                        DatabaseManager dbManager = DatabaseManager.getInstance();
+                        response = dbManager.executeQuery(clientMessage.content);
+                        System.out.println("SQL Response From Leader: " + response);
+                        //send out if not failed
+                        if(!response.startsWith("SQL Error") && clientMessage.content.startsWith("CREATE")) {
+                            System.out.println(clientMessage.content);
+                            // Broadcast the execution command to other servers
+                            if (clientMessage.content.startsWith("CREATE")) {
+                                List<InetAddress> forwardersAddresses = server.getForwardersAddresses();
+                                if (forwardersAddresses.isEmpty()) {
+                                    System.out.println("No listeners available to forward execution command.");
+                                    return;
+                                }
+                                clientMessage.isForwarder = false;
+                                clientMessage.isBroadcast = true;
+
+                                String data = clientMessage.toJson();
+                                System.out.println("data before Broadcasting: " + data);
+
+                                for (InetAddress forwarderAddress : forwardersAddresses) {
+                                    try {
+                                        System.out.println("Request forwarded to server: " + forwarderAddress.getHostAddress());
+                                        response = response + " Request forwarded to listener " + forwarderAddress.getHostAddress();
+
+                                        DatagramPacket forwardPacket = new DatagramPacket(
+                                                data.getBytes(),
+                                                data.getBytes().length,
+                                                forwarderAddress,
+                                                server.getConfig().getServer().getApiPort() // Assuming listeners use the same API port
+                                        );
+                                        externalSocket.send(forwardPacket);
+                                        System.out.println("Execution command sent to listener: " + forwarderAddress.getHostAddress());
+                                    } catch (IOException e) {
+                                        System.out.println("Failed to send execution command to listener " + forwarderAddress.getHostAddress() + ": " + e.getMessage());
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 else {
                     InetAddress leaderAddress = server.getLeaderAddress();
                     if (leaderAddress != null) {
-                        System.out.println("work");
+                        System.out.println("Forwarding request to Leader...");
                         clientMessage.isForwarder = true;
+                        clientMessage.isBroadcast = true;
 
                         String data = clientMessage.toJson();
 
@@ -55,7 +101,7 @@ public class ExternalRequestHandler extends Thread {
                         );
                         externalSocket.send(forwardPacket);
                         System.out.println("Request forwarded to leader: " + leaderAddress.getHostAddress());
-                        response = "Request forwarded to leader.";
+                        response = response + " Request forwarded to leader.";
                     } else {
                         response = "No leader available to handle the request.";
                     }
@@ -68,6 +114,7 @@ public class ExternalRequestHandler extends Thread {
                         clientMessage.port //port klienta
                 );
                 externalSocket.send(responsePacket);
+
 
             } catch (SocketException e) {
                 if (running) {

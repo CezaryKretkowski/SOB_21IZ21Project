@@ -164,6 +164,10 @@ public class Server {
         return leaderAddress;
     }
 
+    public List<InetAddress> getForwardersAddresses() {
+        return forwardersAddresses;
+    }
+
     public void setLeaderAddress(InetAddress leaderAddress) {
         this.leaderAddress = leaderAddress;
     }
