@@ -89,7 +89,7 @@ public class ExternalRequestHandler extends Thread {
                     if (leaderAddress != null) {
                         System.out.println("Forwarding request to Leader...");
                         clientMessage.isForwarder = true;
-                        clientMessage.isBroadcast = true;
+                        clientMessage.isBroadcast = false;
 
                         String data = clientMessage.toJson();
 
