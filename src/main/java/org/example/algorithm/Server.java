@@ -148,6 +148,12 @@ public class Server {
         return timeOut;
     }
 
+    public synchronized void SetLeader(){
+        this.isForwarded = false;
+        this.isLeader = true;
+        this.isCandidate = false;
+    }
+
     public void setTimeOut(int timeOut) {
         this.timeOut = timeOut;
     }

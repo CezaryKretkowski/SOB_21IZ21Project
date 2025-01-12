@@ -71,7 +71,7 @@ public class DatabaseManager {
                 result.append("Update count: ").append(updateCount);
             }
 
-            logQuery(query, result.toString());
+            //logQuery(query, result.toString());
 
             return result.toString();
         } catch (Exception e) {
