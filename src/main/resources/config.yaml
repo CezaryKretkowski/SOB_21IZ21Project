@@ -1,6 +1,5 @@
 server:
-  port: 4446
+  port: 4445
   address: 127.0.0.1
   timeout: 500
-  hostNumber: 5
-  apiPort: 5556
+  hostNumber: 3

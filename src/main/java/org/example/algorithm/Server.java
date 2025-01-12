@@ -128,6 +128,12 @@ public class Server {
         }
     }
 
+    public synchronized void setLeader(){
+        this.isForwarded = false;
+        this.isLeader = true;
+        this.isCandidate = false;
+    }
+
     public ServerConfig getConfig() {
         return config;
     }

@@ -6,6 +6,7 @@ import org.example.config.ConfigLoader;
 import org.example.config.ServerConfig;
 
 
+import org.example.config.ServerDetails;
 import org.yaml.snakeyaml.Yaml;
 
 
@@ -31,6 +32,7 @@ public class Main {
     private static JLabel typeLabel;
     private static JTextField ipField, portField, timeoutField, hostNumberField, apiPortField; // Moved declaration to class level
     private static JButton startButton, stopButton, becomeLeaderButton;
+
 
     public static void main(String[] args) {
         ServerConfig config = ConfigLoader.loadConfig("config.yaml");
@@ -305,7 +307,7 @@ public class Main {
             becomeLeaderButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-
+                    server.setLeader();
                 }
             });
 
