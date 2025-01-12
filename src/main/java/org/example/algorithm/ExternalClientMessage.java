@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 public class ExternalClientMessage {
-    @SerializedName("Content")
+
     public String content;
     public boolean isForwarder;
     public boolean isBroadcast;
