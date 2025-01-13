@@ -226,6 +226,17 @@ public class Main {
                 }
             });
 
+            Timer timer = new Timer(1000, event -> {
+                SwingUtilities.invokeLater(() -> {
+                    if(server.isLeader)
+                        typeLabel.setText("I am a Leader!");
+                    if(server.isCandidate)
+                        typeLabel.setText("I am a Candidate!");
+                    if(server.isForwarded)
+                        typeLabel.setText("I am a Forwarder!");
+                });
+            });
+
             startButton.addActionListener(e -> {
                 String ip = ipField.getText().trim();
                 String secretKey = new String(secretKeyField.getPassword()).trim(); // Get secret key from JPasswordField
@@ -234,12 +245,7 @@ public class Main {
                     server = new Server();
                     server.start(address);
 
-                    if(server.isLeader)
-                        typeLabel.setText("I am a Leader!");
-                    if(server.isCandidate)
-                        typeLabel.setText("I am a Candidate!");
-                    if(server.isForwarded)
-                        typeLabel.setText("I am a Forwarder!");
+
 
                     Message.SECRET_KEY = secretKey;
                     logImportant(doc, successStyle, "Server started at address: " + ip);
@@ -280,6 +286,7 @@ public class Main {
                     startButton.setEnabled(false);
                     stopButton.setEnabled(true);
                     becomeLeaderButton.setEnabled(true);
+                    timer.start();
                 } catch (SocketException ex) {
                     logImportant(doc, errorStyle, "Error starting server: " + ex.getMessage());
                     JOptionPane.showMessageDialog(frame, "Error starting server!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -310,6 +317,11 @@ public class Main {
                     server.setLeader();
                 }
             });
+
+
+
+
+
 
             JPanel fieldsPanel = new JPanel();
             fieldsPanel.setLayout(new GridBagLayout());
