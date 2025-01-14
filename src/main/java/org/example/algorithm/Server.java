@@ -145,6 +145,7 @@ public class Server {
         this.isForwarded = false;
         this.isLeader = true;
         this.isCandidate = false;
+        Debug.log("Im now forwarder");
     }
 
     public void setTimeOut(int timeOut) {

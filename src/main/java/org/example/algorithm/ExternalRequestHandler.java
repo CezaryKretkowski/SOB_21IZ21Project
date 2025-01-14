@@ -26,6 +26,9 @@ public class ExternalRequestHandler extends Thread {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 externalSocket.receive(packet);
 
+                if(packet.getAddress().equals(externalSocket.getLocalAddress()))
+                    continue;
+
                 String receivedData = new String(packet.getData(), 0, packet.getLength());
                 System.out.println("External request received: " + receivedData);
 
@@ -36,53 +39,45 @@ public class ExternalRequestHandler extends Thread {
                     clientMessage.address = packet.getAddress().getHostAddress();
                 }
                 if (clientMessage.isBroadcast) {
-                    // This is a broadcast execution command
+
                     DatabaseManager dbManager = DatabaseManager.getInstance();
                     response = "SQL Response From " + server.getHostNumber() + " " + dbManager.executeQuery(clientMessage.content);
                     System.out.println("SQL Response From Listener: " + response);
                 }
 
                 if (server.isLeader) {
-                    //execute if message is not response from broadcasted listener
-                    //if (!clientMessage.content.startsWith("SQL Response"))
+
 
                     DatabaseManager dbManager = DatabaseManager.getInstance();
                     response = dbManager.executeQuery(clientMessage.content);
                     System.out.println("SQL Response From Leader: " + response);
                     //send out if not failed
-                    if (!response.startsWith("SQL Error") && clientMessage.content.startsWith("CREATE")) {
+                    if (!response.startsWith("SQL Error") && isReplicationNeeded(clientMessage.content)) {
                         System.out.println(clientMessage.content);
-                        // Broadcast the execution command to other servers
-                        //if (clientMessage.content.startsWith("CREATE")) {
-//                                List<InetAddress> forwardersAddresses = server.getForwardersAddresses();
-//                                if (forwardersAddresses.isEmpty()) {
-//                                    System.out.println("No listeners available to forward execution command.");
-//                                    return;
-//                                }
+
                         clientMessage.isForwarder = false;
                         clientMessage.isBroadcast = true;
 
                         String data = clientMessage.toJson();
                         System.out.println("data before Broadcasting: " + data);
 
-                        //   for (InetAddress forwarderAddress : forwardersAddresses) {
+
                         try {
-                            //System.out.println("Request forwarded to server: " + forwarderAddress.getHostAddress());
-                            response = response;// + " Request forwarded to listener " + forwarderAddress.getHostAddress();
+
+                            response = response;
 
                             DatagramPacket forwardPacket = new DatagramPacket(
                                     data.getBytes(),
                                     data.getBytes().length,
                                     InetAddress.getByName("255.255.255.255"),
-                                    server.getConfig().getServer().getApiPort() // Assuming listeners use the same API port
+                                    server.getConfig().getServer().getApiPort()
                             );
                             externalSocket.send(forwardPacket);
-                            //System.out.println("Execution command sent to listener: " + forwarderAddress.getHostAddress());
+
                         } catch (IOException e) {
-                            //System.out.println("Failed to send execution command to listener " + forwarderAddress.getHostAddress() + ": " + e.getMessage());
+
                         }
-//}
-                        // }
+
                     }
 
                     DatagramPacket responsePacket = new DatagramPacket(
@@ -129,7 +124,10 @@ public class ExternalRequestHandler extends Thread {
         externalSocket.close();
         System.out.println("ExternalRequestHandler stopped.");
     }
-
+    public boolean isReplicationNeeded(String content){
+        return content.toLowerCase().startsWith("create") || content.toLowerCase().startsWith("update") || content.toLowerCase().startsWith("delete")
+                || content.toLowerCase().startsWith("insert") ||  content.toLowerCase().startsWith("drop");
+    }
     public void stopHandler() {
         running = false;
         externalSocket.close();

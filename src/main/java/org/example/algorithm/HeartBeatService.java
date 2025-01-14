@@ -32,7 +32,7 @@ public class HeartBeatService {
             }
         }
 
-        if(parent.isCandidate)
+        if(parent.isCandidate || parent.isLeader)
         {
             Debug.log("Server is forwarder");
             parent.electionService.RestVote();

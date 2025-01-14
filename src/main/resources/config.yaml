@@ -3,3 +3,4 @@ server:
   address: 127.0.0.1
   timeout: 500
   hostNumber: 3
+  apiPort: 5556
