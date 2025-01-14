@@ -6,10 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="b4e819cb-fb49-4269-916b-7c38bf258c72" name="Changes" comment="fixes after merge">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/ExternalRequestHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/ExternalRequestHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/HeartBeatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/HeartBeatService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/algorithm/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/algorithm/Server.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/config.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,7 +65,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "frontend",
+    "git-widget-placeholder": "master",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/User/Downloads/SOB_21IZ21Project",
     "node.js.detected.package.eslint": "true",

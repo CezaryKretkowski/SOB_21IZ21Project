@@ -119,6 +119,7 @@ public class Server {
         this.isForwarded = false;
         this.isLeader = true;
         this.isCandidate = false;
+        Debug.log("I am Leader now");
     }
 
     public ServerConfig getConfig() {
