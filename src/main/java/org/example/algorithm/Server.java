@@ -91,19 +91,6 @@ public class Server {
         }
 
         switch (message.getType()) {
-            case sqlQuery -> {
-                DatabaseManager dbManager = DatabaseManager.getInstance();
-                String queryResult = dbManager.executeQuery(message.getContent()); // Użycie metody getContent()
-
-                String response = "SQL Response:\n" + queryResult;
-                DatagramPacket responsePacket = new DatagramPacket(
-                        response.getBytes(),
-                        response.getBytes().length,
-                        packet.getAddress(),
-                        packet.getPort()
-                );
-                socket.send(responsePacket);
-            }
             case voteRequest -> electionService.onRequestReceive(packet, message);
             case voteResponse -> electionService.onResponseReceive(packet, message);
             case heartBeatRequest -> heartBeatService.onRequestReceive(packet, message);
